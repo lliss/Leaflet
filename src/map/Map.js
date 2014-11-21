@@ -54,18 +54,19 @@ L.Map = L.Evented.extend({
 	// public methods that modify map state
 
 	// replaced by animation-powered implementation in Map.PanAnimation.js
-	setView: function (center, zoom) {
+	setView: function (center, zoom, options) {
 		zoom = zoom === undefined ? this.getZoom() : zoom;
-		this._resetView(L.latLng(center), this._limitZoom(zoom));
+		this._resetView(L.latLng(center), this._limitZoom(zoom), null, null, options.eventData);
 		return this;
 	},
 
 	setZoom: function (zoom, options) {
+        var eventData = options ? options.eventData : null;
 		if (!this._loaded) {
 			this._zoom = this._limitZoom(zoom);
 			return this;
 		}
-		return this.setView(this.getCenter(), zoom, {zoom: options});
+		return this.setView(this.getCenter(), zoom, {zoom: options, eventData: eventData});
 	},
 
 	zoomIn: function (delta, options) {
@@ -84,7 +85,7 @@ L.Map = L.Evented.extend({
 		    centerOffset = containerPoint.subtract(viewHalf).multiplyBy(1 - 1 / scale),
 		    newCenter = this.containerPointToLatLng(viewHalf.add(centerOffset));
 
-		return this.setView(newCenter, zoom, {zoom: options});
+		return this.setView(newCenter, zoom, {zoom: options, eventData: options.eventData});
 	},
 
 	fitBounds: function (bounds, options) {
@@ -113,7 +114,7 @@ L.Map = L.Evented.extend({
 	},
 
 	panTo: function (center, options) { // (LatLng)
-		return this.setView(center, this._zoom, {pan: options});
+		return this.setView(center, this._zoom, {pan: options, eventData: options.eventData});
 	},
 
 	panBy: function (offset) { // (Point)
@@ -487,8 +488,7 @@ L.Map = L.Evented.extend({
 
 	// private methods that modify map state
 
-	_resetView: function (center, zoom, preserveMapOffset, afterZoomAnim) {
-
+	_resetView: function (center, zoom, preserveMapOffset, afterZoomAnim, eventData) {
 		var zoomChanged = (this._zoom !== zoom);
 
 		if (!afterZoomAnim) {
@@ -523,7 +523,7 @@ L.Map = L.Evented.extend({
 			this.fire('zoomend');
 		}
 
-		this.fire('moveend', {hard: !preserveMapOffset});
+		this.fire('moveend', {hard: !preserveMapOffset, eventData: eventData});
 	},
 
 	_rawPanBy: function (offset) {

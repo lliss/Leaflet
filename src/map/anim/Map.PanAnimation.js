@@ -32,7 +32,7 @@ L.Map.include({
 		}
 
 		// animation didn't start, just reset the map view
-		this._resetView(center, zoom);
+		this._resetView(center, zoom, null, null, options.eventData);
 
 		return this;
 	},
@@ -47,7 +47,11 @@ L.Map.include({
 		//If we pan too far then chrome gets issues with tiles
 		// and makes them disappear or appear in the wrong place (slightly offset) #2602
 		if (options.animate !== true && !this.getSize().contains(offset)) {
-			return this._resetView(this.unproject(this.project(this.getCenter()).add(offset)), this.getZoom());
+			return this._resetView(
+				this.unproject(this.project(this.getCenter()).add(offset)),
+				this.getZoom(),
+				options.eventData
+			);
 		}
 
 		if (!this._panAnim) {
